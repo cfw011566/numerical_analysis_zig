@@ -33,3 +33,61 @@ pub fn neville(x: f64, x_list: []f64, Q_input: []f64, debug: bool) !f64 {
     }
     return Q_list[n - 1];
 }
+
+/// Algorithm 3.2 Newton's Divided-Difference Formula
+/// x_list : x0, x1, ... xn
+/// F_list : f(x0), f(x1), ... f(xn)
+pub fn divided(x_list: []f64, F_input: []f64, F_output: []f64, debug: bool) !void {
+    const n = x_list.len;
+    const allocator = std.heap.page_allocator;
+    var F_list = try allocator.alloc(f64, n);
+    defer allocator.free(F_list);
+    std.mem.copyForwards(f64, F_list, F_input);
+    for (1..n) |i| {
+        if (debug) {
+            std.debug.print("F_list {any}\n", .{F_list});
+        }
+        for (1..n - i + 1) |j| {
+            const m = n - j;
+            if (debug) {
+                std.debug.print("m = {} n = {} i = {} j = {}\n", .{ m, n, i, j });
+            }
+            const x_j = x_list[m];
+            const x_j_1 = x_list[m - i];
+            const F_i = F_list[m];
+            const F_i_1 = F_list[m - 1];
+            const F = (F_i - F_i_1) / (x_j - x_j_1);
+            if (debug) {
+                std.debug.print("F = {d:.8}\n", .{F});
+            }
+            F_list[m] = F;
+        }
+    }
+    if (debug) {
+        std.debug.print("F_list {any}\n", .{F_list});
+    }
+    std.mem.copyForwards(f64, F_output, F_list);
+}
+
+pub fn divided_interp(x: f64, x_list: []f64, F_input: []f64, debug: bool) !f64 {
+    const n = x_list.len;
+    const allocator = std.heap.page_allocator;
+    const F_output = try allocator.alloc(f64, n);
+    defer allocator.free(F_output);
+    try divided(x_list, F_input, F_output, debug);
+    if (debug) {
+        std.debug.print("F_output {any}\n", .{F_output});
+    }
+    var v: f64 = 0;
+    for (0..n) |i| {
+        var factor: f64 = 1.0;
+        for (0..i) |j| {
+            factor *= (x - x_list[j]);
+            if (debug) {
+                std.debug.print("i = {} j = {} x = {} factor = {d:.8}\n", .{ i, j, x_list[j], factor });
+            }
+        }
+        v += factor * F_output[i];
+    }
+    return v;
+}
