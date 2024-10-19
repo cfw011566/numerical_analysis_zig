@@ -97,11 +97,17 @@ fn chapter3_exercise1() !void {
     const Q_input = [_]f64{ 16.94410, 17.56492, 18.50515, 18.82091 };
     const Q = try interp.neville(x, @constCast(x_input[0..]), @constCast(Q_input[0..]), false);
     std.debug.print("Q = {d:.7}\n", .{Q});
+    const v = try interp.divided_interp(x, @constCast(x_input[0..]), @constCast(Q_input[0..]), false);
+    std.debug.print("v = {d:.7}\n", .{v});
 }
 
 fn chapter3_3_2_example1() !void {
     const x_input = [_]f64{ 1.0, 1.3, 1.6, 1.9, 2.2 };
     const F_input = [_]f64{ 0.7651977, 0.6200860, 0.4554022, 0.2818186, 0.1103623 };
-    const v = try interp.divided_interp(1.5, @constCast(x_input[0..]), @constCast(F_input[0..]), false);
-    std.debug.print("value = {d:.7}\n", .{v});
+    var v = try interp.divided_interp(1.5, @constCast(x_input[0..]), @constCast(F_input[0..]), false);
+    std.debug.print("f(1.5) = {d:.7}\n", .{v});
+    v = try interp.divided_interp(1.1, @constCast(x_input[0..]), @constCast(F_input[0..]), false);
+    std.debug.print("f(1.1) = {d:.7}\n", .{v});
+    v = try interp.divided_interp(2.0, @constCast(x_input[0..]), @constCast(F_input[0..]), false);
+    std.debug.print("f(2.0) = {d:.7}\n", .{v});
 }

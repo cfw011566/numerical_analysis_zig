@@ -10,7 +10,7 @@ pub fn neville(x: f64, x_list: []f64, Q_input: []f64, debug: bool) !f64 {
     const allocator = std.heap.page_allocator;
     var Q_list = try allocator.alloc(f64, n);
     defer allocator.free(Q_list);
-    std.mem.copyForwards(f64, Q_list, Q_input);
+    @memcpy(Q_list, Q_input);
     for (1..n) |i| {
         if (debug) {
             std.debug.print("Q_list {any}\n", .{Q_list});
@@ -39,13 +39,10 @@ pub fn neville(x: f64, x_list: []f64, Q_input: []f64, debug: bool) !f64 {
 /// F_list : f(x0), f(x1), ... f(xn)
 pub fn divided(x_list: []f64, F_input: []f64, F_output: []f64, debug: bool) !void {
     const n = x_list.len;
-    const allocator = std.heap.page_allocator;
-    var F_list = try allocator.alloc(f64, n);
-    defer allocator.free(F_list);
-    std.mem.copyForwards(f64, F_list, F_input);
+    @memcpy(F_output, F_input);
     for (1..n) |i| {
         if (debug) {
-            std.debug.print("F_list {any}\n", .{F_list});
+            std.debug.print("F {any}\n", .{F_output});
         }
         for (1..n - i + 1) |j| {
             const m = n - j;
@@ -54,19 +51,18 @@ pub fn divided(x_list: []f64, F_input: []f64, F_output: []f64, debug: bool) !voi
             }
             const x_j = x_list[m];
             const x_j_1 = x_list[m - i];
-            const F_i = F_list[m];
-            const F_i_1 = F_list[m - 1];
+            const F_i = F_output[m];
+            const F_i_1 = F_output[m - 1];
             const F = (F_i - F_i_1) / (x_j - x_j_1);
             if (debug) {
                 std.debug.print("F = {d:.8}\n", .{F});
             }
-            F_list[m] = F;
+            F_output[m] = F;
         }
     }
     if (debug) {
-        std.debug.print("F_list {any}\n", .{F_list});
+        std.debug.print("F_output {any}\n", .{F_output});
     }
-    std.mem.copyForwards(f64, F_output, F_list);
 }
 
 pub fn divided_interp(x: f64, x_list: []f64, F_input: []f64, debug: bool) !f64 {
